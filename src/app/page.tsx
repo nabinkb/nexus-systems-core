@@ -1,8 +1,32 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+function randomize(value: number, delta = 4): number {
+  const change = (Math.random() - 0.5) * 2 * delta;
+  return Math.round(Math.min(100, Math.max(0, value + change)));
+}
 
 export default function Home() {
+  const [sydney, setSydney] = useState({ cpu: 23, ram: 62, disk: 41 });
+  const [kathmandu, setKathmandu] = useState({ cpu: 45, ram: 38, disk: 71 });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSydney((prev) => ({
+        cpu: randomize(prev.cpu),
+        ram: randomize(prev.ram),
+        disk: randomize(prev.disk),
+      }));
+      setKathmandu((prev) => ({
+        cpu: randomize(prev.cpu),
+        ram: randomize(prev.ram),
+        disk: randomize(prev.disk),
+      }));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 font-sans p-8">
       <main className="max-w-6xl mx-auto">
@@ -23,8 +47,18 @@ export default function Home() {
               <span className="bg-emerald-500/10 text-emerald-500 text-[10px] px-2 py-1 rounded-full border border-emerald-500/20">OPERATIONAL</span>
             </div>
             <div className="space-y-4">
-              <div className="flex justify-between text-sm"><span className="text-zinc-500">Node Load</span><span className="font-mono">23%</span></div>
-              <div className="w-full bg-zinc-800 h-1 rounded-full"><div className="bg-emerald-500 h-1 rounded-full w-[23%]"></div></div>
+              <div className="flex justify-between text-sm"><span className="text-zinc-500">CPU</span><span className="font-mono">{sydney.cpu}%</span></div>
+              <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden">
+                <div className="bg-emerald-500 h-1 rounded-full transition-[width] duration-500 ease-out" style={{ width: `${sydney.cpu}%` }}></div>
+              </div>
+              <div className="flex justify-between text-sm"><span className="text-zinc-500">RAM</span><span className="font-mono">{sydney.ram}%</span></div>
+              <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden">
+                <div className="bg-emerald-500 h-1 rounded-full transition-[width] duration-500 ease-out" style={{ width: `${sydney.ram}%` }}></div>
+              </div>
+              <div className="flex justify-between text-sm"><span className="text-zinc-500">Disk</span><span className="font-mono">{sydney.disk}%</span></div>
+              <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden">
+                <div className="bg-emerald-500 h-1 rounded-full transition-[width] duration-500 ease-out" style={{ width: `${sydney.disk}%` }}></div>
+              </div>
             </div>
           </div>
 
@@ -35,8 +69,18 @@ export default function Home() {
               <span className="bg-yellow-500/10 text-yellow-500 text-[10px] px-2 py-1 rounded-full border border-yellow-500/20">MAINTENANCE</span>
             </div>
             <div className="space-y-4">
-              <div className="flex justify-between text-sm"><span className="text-zinc-500">Sync Status</span><span className="font-mono text-yellow-500">RUNNING DIAGNOSTICS</span></div>
-              <div className="w-full bg-zinc-800 h-1 rounded-full"><div className="bg-yellow-500 h-1 rounded-full w-[45%] animate-pulse"></div></div>
+              <div className="flex justify-between text-sm"><span className="text-zinc-500">CPU</span><span className="font-mono text-yellow-500">{kathmandu.cpu}%</span></div>
+              <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden">
+                <div className="bg-yellow-500 h-1 rounded-full transition-[width] duration-500 ease-out" style={{ width: `${kathmandu.cpu}%` }}></div>
+              </div>
+              <div className="flex justify-between text-sm"><span className="text-zinc-500">RAM</span><span className="font-mono text-yellow-500">{kathmandu.ram}%</span></div>
+              <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden">
+                <div className="bg-yellow-500 h-1 rounded-full transition-[width] duration-500 ease-out" style={{ width: `${kathmandu.ram}%` }}></div>
+              </div>
+              <div className="flex justify-between text-sm"><span className="text-zinc-500">Disk</span><span className="font-mono text-yellow-500">{kathmandu.disk}%</span></div>
+              <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden">
+                <div className="bg-yellow-500 h-1 rounded-full transition-[width] duration-500 ease-out" style={{ width: `${kathmandu.disk}%` }}></div>
+              </div>
             </div>
           </div>
         </div>
