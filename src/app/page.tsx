@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 function randomize(value: number, delta = 4): number {
   const change = (Math.random() - 0.5) * 2 * delta;
@@ -11,31 +11,94 @@ export default function Home() {
   const [sydney, setSydney] = useState({ cpu: 23, ram: 62, disk: 41 });
   const [kathmandu, setKathmandu] = useState({ cpu: 45, ram: 38, disk: 71 });
 
+  const [clockSYD, setClockSYD] = useState<string>('--:--:--');
+  const [clockKTM, setClockKTM] = useState<string>('--:--:--');
+
+  const fmtSYD = useMemo(
+    () =>
+      new Intl.DateTimeFormat(undefined, {
+        timeZone: 'Australia/Sydney',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      }),
+    []
+  );
+
+  const fmtKTM = useMemo(
+    () =>
+      new Intl.DateTimeFormat(undefined, {
+        timeZone: 'Asia/Kathmandu',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      }),
+    []
+  );
+
+  const lastHeartbeatAtRef = useRef<number>(0);
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setSydney((prev) => ({
-        cpu: randomize(prev.cpu),
-        ram: randomize(prev.ram),
-        disk: randomize(prev.disk),
-      }));
-      setKathmandu((prev) => ({
-        cpu: randomize(prev.cpu),
-        ram: randomize(prev.ram),
-        disk: randomize(prev.disk),
-      }));
-    }, 3000);
+    const tick = () => {
+      const now = new Date();
+      setClockSYD(fmtSYD.format(now));
+      setClockKTM(fmtKTM.format(now));
+
+      const nowMs = Date.now();
+      if (!lastHeartbeatAtRef.current) lastHeartbeatAtRef.current = nowMs;
+      if (nowMs - lastHeartbeatAtRef.current >= 3000) {
+        lastHeartbeatAtRef.current = nowMs;
+        setSydney((prev) => ({
+          cpu: randomize(prev.cpu),
+          ram: randomize(prev.ram),
+          disk: randomize(prev.disk),
+        }));
+        setKathmandu((prev) => ({
+          cpu: randomize(prev.cpu),
+          ram: randomize(prev.ram),
+          disk: randomize(prev.disk),
+        }));
+      }
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fmtKTM, fmtSYD]);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 font-sans p-8">
       <main className="max-w-6xl mx-auto">
         {/* Header */}
         <header className="mb-12 border-b border-zinc-800 pb-6">
-          <h1 className="text-3xl font-bold tracking-tighter text-emerald-500">
-            NEXUS <span className="text-zinc-500 text-xl font-light">SYSTEMS OPERATIONS</span>
-          </h1>
-          <p className="text-zinc-500 text-sm mt-2 font-mono">LOCATION: SYDNEY / KATHMANDU SYNC</p>
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tighter text-emerald-500">
+                NEXUS <span className="text-zinc-500 text-xl font-light">SYSTEMS OPERATIONS</span>
+              </h1>
+              <p className="text-zinc-500 text-sm mt-2 font-mono">LOCATION: SYDNEY / KATHMANDU SYNC</p>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 md:justify-end">
+              <div className="text-xs font-medium tracking-wide text-zinc-400">TIMEZONE SYNC</div>
+              <div className="flex items-center gap-2">
+                <div className="px-3 py-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 shadow-[0_0_20px_rgba(16,185,129,0.08)]">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[10px] tracking-widest text-emerald-400/90">SYD</span>
+                    <span className="font-mono text-sm text-emerald-300 tabular-nums">{clockSYD}</span>
+                  </div>
+                </div>
+                <div className="px-3 py-2 rounded-lg border border-cyan-400/20 bg-cyan-400/5 shadow-[0_0_20px_rgba(34,211,238,0.08)]">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[10px] tracking-widest text-cyan-300/90">KTM</span>
+                    <span className="font-mono text-sm text-cyan-200 tabular-nums">{clockKTM}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* Dashboard Grid */}
